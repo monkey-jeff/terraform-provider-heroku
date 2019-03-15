@@ -19,7 +19,7 @@ func resourceHerokuConfigAssociation() *schema.Resource {
 		Delete: resourceHerokuConfigAssociationDelete,
 
 		//Importer: &schema.ResourceImporter{
-		//	State: resourceHerokuConfigImport,
+		//	State: resourceHerokuConfigAssociationImport,
 		//},
 
 		Schema: map[string]*schema.Schema{
@@ -47,6 +47,24 @@ func resourceHerokuConfigAssociation() *schema.Resource {
 			},
 		},
 	}
+}
+
+// NOTE: Keeping this unused for now as importing vars and sensitive vars doesn't seem to possible to do
+func resourceHerokuConfigAssociationImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	setErr := d.Set("app_id", d.Id())
+	if setErr != nil {
+		return nil, setErr
+	}
+
+	log.Printf("[WARN] Importing vars: %s", d.Get("vars"))
+	log.Printf("[WARN] Importing sensitive vars: %s", d.Get("sensitive_vars"))
+
+	readErr := resourceHerokuConfigAssociationRead(d, m)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceHerokuConfigAssociationCreate(d *schema.ResourceData, m interface{}) error {
@@ -146,6 +164,7 @@ func resourceHerokuConfigAssociationDelete(d *schema.ResourceData, m interface{}
 
 	// Remove resource from state
 	d.SetId("")
+
 	return nil
 }
 

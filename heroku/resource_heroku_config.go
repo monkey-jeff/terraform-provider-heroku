@@ -15,9 +15,9 @@ func resourceHerokuConfig() *schema.Resource {
 		Update: resourceHerokuConfigUpdate,
 		Delete: resourceHerokuConfigDelete,
 
-		//Importer: &schema.ResourceImporter{
-		//	State: resourceHerokuConfigImport,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: resourceHerokuConfigImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -44,6 +44,15 @@ func resourceHerokuConfig() *schema.Resource {
 			},
 		},
 	}
+}
+
+// As heroku_config does not interact with any remote, it will not be possible to import anything.
+// Therefore, this function will notify user of this inability.
+func resourceHerokuConfigImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	noImportErr := fmt.Errorf("it is not possible to import heroku_config since there are no remote resources" +
+		" associated with heroku_config")
+
+	return nil, noImportErr
 }
 
 func resourceHerokuConfigCreate(d *schema.ResourceData, m interface{}) error {
