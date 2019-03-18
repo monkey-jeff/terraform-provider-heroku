@@ -18,9 +18,9 @@ func resourceHerokuConfigAssociation() *schema.Resource {
 		Update: resourceHerokuConfigAssociationUpdate,
 		Delete: resourceHerokuConfigAssociationDelete,
 
-		//Importer: &schema.ResourceImporter{
-		//	State: resourceHerokuConfigAssociationImport,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: resourceHerokuConfigAssociationImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"app_id": {
@@ -49,22 +49,11 @@ func resourceHerokuConfigAssociation() *schema.Resource {
 	}
 }
 
-// NOTE: Keeping this unused for now as importing vars and sensitive vars doesn't seem to possible to do
+// As it is not possible to determine an app's config var sensitivity, it will not be possible to import this resource
 func resourceHerokuConfigAssociationImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	setErr := d.Set("app_id", d.Id())
-	if setErr != nil {
-		return nil, setErr
-	}
+	noImportErr := fmt.Errorf("it is not possible to import heroku_config_association since there are no remote resources")
 
-	log.Printf("[WARN] Importing vars: %s", d.Get("vars"))
-	log.Printf("[WARN] Importing sensitive vars: %s", d.Get("sensitive_vars"))
-
-	readErr := resourceHerokuConfigAssociationRead(d, m)
-	if readErr != nil {
-		return nil, readErr
-	}
-
-	return []*schema.ResourceData{d}, nil
+	return nil, noImportErr
 }
 
 func resourceHerokuConfigAssociationCreate(d *schema.ResourceData, m interface{}) error {
@@ -88,7 +77,7 @@ func resourceHerokuConfigAssociationCreate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	d.SetId(appId) // TODO: should make this more unique?
+	d.SetId(fmt.Sprintf("config:%s", appId))
 	setErr := d.Set("app_id", appId)
 	if setErr != nil {
 		return setErr
@@ -100,12 +89,14 @@ func resourceHerokuConfigAssociationCreate(d *schema.ResourceData, m interface{}
 func resourceHerokuConfigAssociationRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Config).Api
 
+	appId := getAppId(d)
+
 	vettedVars := make(map[string]string)
 	vettedSensitiveVars := make(map[string]string)
 	vars := getVars(d)
 	sensitiveVars := getSensitiveVars(d)
 
-	remoteAppVars, remoteAppGetErr := retrieveConfigVars(d.Id(), client)
+	remoteAppVars, remoteAppGetErr := retrieveConfigVars(appId, client)
 	if remoteAppGetErr != nil {
 		return remoteAppGetErr
 	}

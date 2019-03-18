@@ -35,13 +35,13 @@ resource "heroku_config" "endpoints" {
 * `name` - (Required) Name of the var(s). This could be anything to uniquely identify the var(s).
 * `vars` - Map of vars that are can be outputted in plaintext
 * `sensitive_vars` - This is the same as `vars`. The main difference between the two
-attributes is when `sensitive_vars` outputs are displayed on-screen following a terraform
-apply or terraform refresh, they are redacted, with <sensitive> displayed in place of their value.
-It is recommended to put private keys, passwords, etc in this argument.
+attributes is `sensitive_vars` outputs are redacted on-screen and replaced by a <sensitive> placeholder, following a terraform
+plan or apply. It is recommended to put private keys, passwords, etc in this argument.
 
 ## Attributes Reference
 The following attributes are exported:
 * `id` - The ID of the config
 
 ## Import
-As this resource does not make any changes remotely to your Heroku account, it is not possible to import existing `heroku_config` configuration(s).
+The `heroku_config` resource is a meta-resource, managed only within Terraform state.
+It does not exist as a native Heroku resource. Therefore, it is not possible to import an existing `heroku_config` resource.

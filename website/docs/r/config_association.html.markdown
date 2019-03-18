@@ -8,7 +8,7 @@ description: |-
 
 # heroku\_config\_association
 Provides a Heroku Config Association resource, making it possible to set/update/remove heroku app config vars independently from
-`heroku_app`. An example setup could be:
+`heroku_app`. An example usage scenario could be:
 
 - User has separate git repositories for various micro-services. Multiple micro-services use Kafka.
 - User has a separate repository for kafka terraform files with blue/green support.
@@ -17,6 +17,11 @@ Provides a Heroku Config Association resource, making it possible to set/update/
 for each micro-service to pick up the new kafka clusters. However with this resource, user can do one `terraform apply`
 and let Heroku handle the rolling restarts to pick up the new config vars.
 
+~> **NOTE:**
+- Heroku does not have a 'sensitivity' distinction for its config variables.
+This distinction is only made during Terraform plans and applies to avoid leaking sensitive data via plan output.
+- Be careful when having config variables defined in both `heroku_app` and `heroku_config_association` resources. As the latter resource
+has a dependency on the former, any overlapping config variables in `heroku_app` will be overwritten in `heroku_config_association`.
 
 ## Example HCL
 ```hcl
@@ -63,10 +68,13 @@ resource "heroku_config_association" "foobar2" {
 * `app_id` - (Required) A Heroku app's `UUID`. Can also be the name of the Heroku app but `UUID` is preferred as it is idempotent
 * `vars` - Map of config vars that are can be outputted in plaintext
 * `sensitive_vars` - This is the same as `vars`. The main difference between the two
-attributes is when `sensitive_vars` outputs are displayed on-screen following a terraform
-apply or terraform refresh, they are redacted, with <sensitive> displayed in place of their value.
-It is recommended to put private keys, passwords, etc in this argument.
+attributes is `sensitive_vars` outputs are redacted on-screen and replaced by a <sensitive> placeholder, following a terraform
+plan or apply. It is recommended to put private keys, passwords, etc in this argument.
 
 ## Attributes Reference
 The following attributes are exported:
 * `id` - The ID of the config association
+
+## Import
+The `heroku_config_association` resource's primary attributes are managed only within Terraform state.
+It does not exist as a native Heroku resource. Therefore, it is not possible to import an existing `heroku_config_association` resource.
