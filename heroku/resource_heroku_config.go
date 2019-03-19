@@ -46,7 +46,7 @@ func resourceHerokuConfig() *schema.Resource {
 	}
 }
 
-// As heroku_config does not interact with any remote, it will not be possible to import anything.
+// It will not be possible to import this resource as  heroku_config does not interact with any remote resources.
 // Therefore, this function will notify user of this inability.
 func resourceHerokuConfigImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	noImportErr := fmt.Errorf("it is not possible to import heroku_config since there are no remote resources" +
@@ -70,7 +70,7 @@ func resourceHerokuConfigCreate(d *schema.ResourceData, m interface{}) error {
 		sensitiveVars = vs
 	}
 
-	// Check for duplicate values. If there are duplicates, error out
+	// Check for duplicate values. If there are duplicates, error out as a preventative measure
 	dupeErr := duplicateChecker(vars, sensitiveVars)
 	if dupeErr != nil {
 		return dupeErr
@@ -122,12 +122,15 @@ func resourceHerokuConfigUpdate(d *schema.ResourceData, m interface{}) error {
 		return dupeErr
 	}
 
+	// If no duplicates, simply set new values in state.
 	return resourceHerokuConfigRead(d, m)
 }
 
 func resourceHerokuConfigDelete(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] There is no DELETE for config resource since no data is stored in Heroku. " +
 		"Resource will be removed from state.")
+
+	d.SetId("")
 
 	return nil
 }

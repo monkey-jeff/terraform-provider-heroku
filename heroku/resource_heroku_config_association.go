@@ -49,7 +49,7 @@ func resourceHerokuConfigAssociation() *schema.Resource {
 	}
 }
 
-// As it is not possible to determine an app's config var sensitivity, it will not be possible to import this resource
+// As config var sensitivity is not a built-in Heroku distinction, it will not be possible to import this resource.
 func resourceHerokuConfigAssociationImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	noImportErr := fmt.Errorf("it is not possible to import heroku_config_association since there are no remote resources")
 
@@ -101,7 +101,7 @@ func resourceHerokuConfigAssociationRead(d *schema.ResourceData, m interface{}) 
 		return remoteAppGetErr
 	}
 
-	// Verify through each vars and sensitiveVars by checking each pair against what was set romotely
+	// Verify through each vars and sensitiveVars by checking each key, value pair against what was set romotely
 	for k := range vars {
 		vettedVars[k] = remoteAppVars[k]
 	}
@@ -148,7 +148,7 @@ func resourceHerokuConfigAssociationDelete(d *schema.ResourceData, m interface{}
 	sensitiveVars := getSensitiveVars(d)
 	allVars := mergeVars(vars, sensitiveVars)
 
-	// Do essentially an update to delete all the vars listed in the schema
+	// Essentially execute an update to delete all the vars listed in the schema only
 	if err := updateVars(appId, client, allVars, nil); err != nil {
 		return err
 	}
